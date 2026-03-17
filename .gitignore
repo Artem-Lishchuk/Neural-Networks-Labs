@@ -1,0 +1,7 @@
+*.pdf
+.cursor/
+*.png
+
+venv/
+__pycache__/
+datasets/
