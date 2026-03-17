@@ -1,0 +1,5 @@
+ipykernel
+torch
+matplotlib
+six
+numpy
