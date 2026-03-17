@@ -194,6 +194,7 @@ class TwoLayerNet(object):
 
         # Use SGD to optimize the parameters in self.model
         loss_history = []
+        val_loss_history = []
         train_acc_history = []
         val_acc_history = []
 
@@ -243,12 +244,16 @@ class TwoLayerNet(object):
                 
                 train_acc_history.append(train_acc)
                 val_acc_history.append(val_acc)
+                
+                val_loss, _ = self.loss(X_val, y=y_val, reg=reg)
+                val_loss_history.append(val_loss.item())
 
                 # Decay learning rate
                 learning_rate *= learning_rate_decay
 
         return {
           'loss_history': loss_history,
+          'val_loss_history': val_loss_history,
           'train_acc_history': train_acc_history,
           'val_acc_history': val_acc_history,
         }
