@@ -76,6 +76,8 @@ def sgd_momentum(w, dw, config=None):
     # the next_w variable. You should also use and update the velocity v.     #
     # HINT: http://cs231n.github.io/neural-networks-3/#sgd                    #
     ###########################################################################
+    v = v * config['momentum'] - config['learning_rate'] * dw
+    next_w = w + v
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
