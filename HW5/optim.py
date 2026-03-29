@@ -118,7 +118,8 @@ def rmsprop(x, dx, config=None):
     # config['cache'].                                                        #
     # HINT: http://cs231n.github.io/neural-networks-3/#ada                    #
     ###########################################################################
-
+    config['cache'] = config['decay_rate'] * config['cache'] + (1 - config['decay_rate']) * dx ** 2
+    next_x = x - config['learning_rate'] * dx / (torch.sqrt(config['cache']) + config['epsilon'])
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
