@@ -76,6 +76,8 @@ def sgd_momentum(w, dw, config=None):
     # the next_w variable. You should also use and update the velocity v.     #
     # HINT: http://cs231n.github.io/neural-networks-3/#sgd                    #
     ###########################################################################
+    v = v * config['momentum'] - config['learning_rate'] * dw
+    next_w = w + v
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -116,7 +118,8 @@ def rmsprop(x, dx, config=None):
     # config['cache'].                                                        #
     # HINT: http://cs231n.github.io/neural-networks-3/#ada                    #
     ###########################################################################
-
+    config['cache'] = config['decay_rate'] * config['cache'] + (1 - config['decay_rate']) * dx ** 2
+    next_x = x - config['learning_rate'] * dx / (torch.sqrt(config['cache']) + config['epsilon'])
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -159,7 +162,15 @@ def adam(x, dx, config=None):
     # m, v, and t variables stored in config. NB! Increase t before update!   #
     # HINT: http://cs231n.github.io/neural-networks-3/#ada                    #
     ###########################################################################
+    config['t'] += 1
+    
+    config['m'] = config['beta1'] * config['m'] + (1 - config['beta1']) * dx
+    mt = config['m'] / (1 - config['beta1']**config['t'])
 
+    config['v'] = config['beta2'] * config['v'] + (1 - config['beta2']) * (dx ** 2)
+    vt = config['v'] / (1 - config['beta2']**config['t'])
+
+    next_x = x - config['learning_rate'] * mt / (torch.sqrt(vt) + config['epsilon'])
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################

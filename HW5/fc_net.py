@@ -185,7 +185,11 @@ class FullyConnectedNet(object):
         # beta2, etc. Scale parameters should be initialized to one and shift      #
         # parameters should be initialized to zero.                                #
         ############################################################################
+        weights_dim = [input_dim] + hidden_dims + [num_classes]
 
+        for i in range(1, self.num_layers + 1):
+          self.params[f'W{i}'] = torch.randn(weights_dim[i - 1], weights_dim[i]) * weight_scale
+          self.params[f'b{i}'] = torch.zeros(weights_dim[i])
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -251,7 +255,19 @@ class FullyConnectedNet(object):
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
         ############################################################################
+        scores = X
+        cache = {}
+        for layer_num in range(1, self.num_layers):
+          scores, layer_cache = affine_forward(scores, self.params[f'W{layer_num}'], self.params[f'b{layer_num}'])
 
+          cache[f'layer{layer_num}_cache'] = layer_cache
+
+          scores, relu_cache = relu_forward(scores)
+
+          cache[f'layer{layer_num}_relu_cache'] = relu_cache
+        
+        scores, last_layer_cache = affine_forward(scores, self.params[f'W{self.num_layers}'], self.params[f'b{self.num_layers}'])
+        cache[f'layer{self.num_layers}_cache'] = last_layer_cache
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -276,7 +292,17 @@ class FullyConnectedNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
+        loss, dL = softmax_loss(scores, y) 
+        loss += 0.5 * self.reg * sum(torch.sum(self.params[f'W{i}'] ** 2) for i in range(1, self.num_layers + 1))
 
+        grad, grads[f'W{self.num_layers}'], grads[f'b{self.num_layers}'] = affine_backward(dL, cache[f'layer{self.num_layers}_cache'])
+        grads[f'W{self.num_layers}'] += self.reg * self.params[f'W{self.num_layers}']
+        
+        for layer_num in range(self.num_layers -1, 0, -1):
+          grad = relu_backward(grad, cache[f'layer{layer_num}_relu_cache'])
+          
+          grad, grads[f'W{layer_num}'], grads[f'b{layer_num}'] = affine_backward(grad, cache[f'layer{layer_num}_cache'])
+          grads[f'W{layer_num}'] += self.reg * self.params[f'W{layer_num}']
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
