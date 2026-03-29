@@ -47,7 +47,10 @@ class TwoLayerNet(object):
         # and biases using the keys 'W2' and 'b2'.                                 #
         # See also: http://cs231n.github.io/neural-networks-2/#init                #
         ############################################################################
-
+        self.params['W1'] = torch.randn(input_dim, hidden_dim) * weight_scale
+        self.params['W2'] = torch.randn(hidden_dim, num_classes) * weight_scale
+        self.params['b1'] = torch.zeros(hidden_dim)
+        self.params['b2'] = torch.zeros(num_classes)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -80,6 +83,9 @@ class TwoLayerNet(object):
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
+        out1, layer1_cache = affine_forward(X, self.params['W1'], self.params['b1'])
+        relu_layer, relu_cache = relu_forward(out1)
+        scores, layer2_cache = affine_forward(relu_layer, self.params['W2'], self.params['b2'])
 
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -102,6 +108,17 @@ class TwoLayerNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
+        loss, dL = softmax_loss(scores, y) 
+        loss += 0.5 * self.reg * torch.sum(self.params['W1'] * self.params['W1'])
+        loss += 0.5 * self.reg * torch.sum(self.params['W2'] * self.params['W2'])
+
+        relu_grad, grads['W2'], grads['b2'] = affine_backward(dL, layer2_cache)
+        grads['W2'] += self.reg * self.params['W2']
+
+        out1_grad = relu_backward(relu_grad, relu_cache)
+        
+        input_grad, grads['W1'], grads['b1'] = affine_backward(out1_grad, layer1_cache)
+        grads['W1'] += self.reg * self.params['W1']
 
         ############################################################################
         #                             END OF YOUR CODE                             #
