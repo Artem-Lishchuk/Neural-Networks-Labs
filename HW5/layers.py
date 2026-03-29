@@ -65,7 +65,12 @@ def affine_backward(dout, cache):
     # TODO: Implement the affine backward pass. Do not forget to reshape your #
     # dx to match the dimensions of x.                                        #
     ###########################################################################
+    input = torch.reshape(x, (x.shape[0], -1))
+    dw = input.T @ dout # shape
+    db = torch.sum(dout, dim = 0)
+    dx = dout @ w.T
 
+    dx = dx.reshape_as(x)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
