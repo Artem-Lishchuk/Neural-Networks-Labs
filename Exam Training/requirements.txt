@@ -2,3 +2,4 @@ torch
 ipykernel
 matplotlib
 numpy
+scikit-learn
