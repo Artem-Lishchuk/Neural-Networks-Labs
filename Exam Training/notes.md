@@ -3,4 +3,3 @@ Stuff to learn again:
 - dropouts
 - batch norm
 - regression
-- multi class classification
