@@ -147,7 +147,27 @@ def max_pool_forward_naive(x, pool_param):
     # Task 6.4                                                                #
     # TODO: Implement the max pooling forward pass                            #
     ###########################################################################
+    images = []
+    N, C, H, W = x.shape
+    pool_width = pool_param['pool_width']
+    pool_height = pool_param['pool_height']
+    stride = pool_param['stride']
 
+    for n, image in enumerate(x):
+      H_out = (H - pool_height) // stride + 1
+      W_out = (W - pool_width) // stride + 1
+      image_pooled = torch.zeros((C, H_out, W_out), dtype = x.dtype)
+
+      for r in range(H_out):
+        for c in range(W_out):
+          r0 = r * stride
+          c0 = c * stride
+          batch = image[:, r0:r0+ pool_height, c0:c0 + pool_width]
+          image_pooled[:, r , c] = torch.Tensor.amax(batch, dim = (1,2))
+      
+      images.append(image_pooled)
+
+    out = torch.stack(images)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
