@@ -73,10 +73,14 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         sample_mean = torch.mean(x, dim = 0, keepdim=True)
         running_mean = running_mean * momentum + (1 - momentum) * sample_mean
 
-        sample_std = torch.std(x, dim = 0, keepdim=True, correction = 0)
-        running_std = running_std * momentum + (1 - momentum) * sample_std
+        sample_var = torch.var(x, dim=0, keepdim=True, correction=0)
+        sample_std = torch.sqrt(sample_var + eps)
+        running_std = running_std * momentum + (1 - momentum) * torch.sqrt(sample_var)
 
-        out = (x - sample_mean) / (sample_std + eps)
+        out = (x - sample_mean) / sample_std
+
+        cache = (gamma, out, sample_std)
+
         out = gamma * out + beta
         #######################################################################
         #                           END OF YOUR CODE                          #
@@ -90,9 +94,8 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # then scale and shift the normalized data using gamma and beta.      #
         # Store the result in the out variable.                               #
         #######################################################################
-        out = (x - running_mean) / (running_std + eps)
-        out = gamma * out + beta
-
+        x_norm = (x - running_mean) / (running_std + eps)
+        out = gamma * x_norm + beta
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
@@ -134,7 +137,15 @@ def batchnorm_backward(dout, cache):
     #                                                                         #
     # HINT: https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html #
     ###########################################################################
+    gamma, x_norm, sample_std = cache
+    N, D = dout.shape
 
+    dbeta = torch.sum(dout, dim = 0)
+    dgamma = torch.sum(dout * x_norm, dim = 0)
+
+    dx_hat = dout * gamma
+
+    dx = (1 / (N * sample_std)) * (N * dx_hat - torch.sum(dx_hat, dim=0) - x_norm * torch.sum(dx_hat * x_norm, dim=0))
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
