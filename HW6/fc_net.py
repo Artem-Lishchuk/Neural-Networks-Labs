@@ -198,7 +198,7 @@ class FullyConnectedNet(object):
             self.params['b%d' % (i + 1)] = torch.zeros(this_dim, dtype=self.dtype)
 
             if self.use_batchnorm:
-                
+                pass  # TODO Task 6.11: initialize gamma and beta for this layer
 
             prev_dim = this_dim
 
@@ -228,6 +228,7 @@ class FullyConnectedNet(object):
 
         self.bn_params = []
         if self.use_batchnorm:
+            pass  # TODO Task 6.11: populate self.bn_params with one dict per hidden layer
 
         # Cast all parameters to the correct datatype
         for k, v in self.params.items():
@@ -252,6 +253,8 @@ class FullyConnectedNet(object):
             self.dropout_param['mode'] = mode
 
         if self.use_batchnorm:
+            for bn_param in self.bn_params:
+                bn_param['mode'] = mode
 
         scores = None
 
@@ -274,7 +277,7 @@ class FullyConnectedNet(object):
         for i in range(self.num_layers - 1):
 
             if self.use_batchnorm:
-
+                pass  # TODO Task 6.11: implement batchnorm forward pass here
             else:
 
                 h, cache = affine_relu_forward(h, self.params['W%d' % (i + 1)], self.params['b%d' % (i + 1)])
@@ -326,7 +329,7 @@ class FullyConnectedNet(object):
                 dh = dropout_backward(dh, cache)
 
             if self.use_batchnorm:
-
+                pass  # TODO Task 6.11: implement batchnorm backward pass here
             else:
 
                 cache = caches.pop()
@@ -334,6 +337,9 @@ class FullyConnectedNet(object):
 
             loss += 0.5 * self.reg * torch.sum(self.params['W%d' % (i + 1)] * self.params['W%d' % (i + 1)])
             grads['W%d' % (i + 1)] += self.reg * self.params['W%d' % (i + 1)]
+
+        loss += 0.5 * self.reg * torch.sum(self.params['W%d' % self.num_layers] * self.params['W%d' % self.num_layers])
+        grads['W%d' % self.num_layers] += self.reg * self.params['W%d' % self.num_layers]
 
         assert len(caches) == 0
 
