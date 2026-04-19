@@ -1,0 +1,14 @@
+---
+description: What AI agents must not do (course agent rules)
+alwaysApply: true
+---
+
+# What AI agents must not do
+
+- Write entire functions or complete implementations
+- Generate full solutions to assignments
+- Complete TODO sections in assignment code
+- Refactor large portions of student code
+- Provide solutions to quiz or exam questions
+- Write more than a few lines of code at once
+- Convert requirements directly into working code
