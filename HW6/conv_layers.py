@@ -68,7 +68,7 @@ def conv_forward_naive(x, w, b, conv_param):
     ###########################################################################
 
     cache = (x, w, b, conv_param) # store the input data and parameters for backpropagation
-    out = torch.stack(images)
+    out = torch.stack(images) # shape: (N, F, H_conv, W_conv)
     return out, cache
 
 def conv_backward_naive(dout, cache):
@@ -86,11 +86,40 @@ def conv_backward_naive(dout, cache):
     - db: Gradient with respect to b
     """
 
+    x, w, b, conv_param = cache
+
     ###########################################################################
     # Task 6.3                                                                # 
     # TODO: Implement the convolutional backward pass.                        #
     ###########################################################################
+    images = []
+    N, C, H, W = x.shape
+    F, C, HH, WW = w.shape
+    pad = conv_param['pad']
+    stride = conv_param['stride']
 
+    db = dout.sum(dim=(0, 2, 3))
+    dw = torch.zeros_like(w)    
+    dx = torch.zeros_like(x)
+    
+    for n, (image_input, image_grad) in enumerate(zip(x, dout)):
+      image = np.pad(image_input, ((0, 0), (pad, pad), (pad, pad)), 'constant')
+      image = torch.from_numpy(image)
+      dx_pad = torch.zeros(C, H + 2*pad, W + 2*pad, dtype=x.dtype)
+      
+      for f, (filter, bias, filter_grad) in enumerate(zip(w,b, image_grad)):
+        H_conv = (H + 2 * pad - HH) // stride + 1
+        W_conv = (W + 2 * pad - WW) // stride + 1
+
+        for r in range(H_conv):
+          for c in range(W_conv):
+            r0 = r * stride
+            c0 = c * stride
+            x_batch = image[:, r0:r0+HH, c0:c0+WW]
+            dw[f] += filter_grad[r][c] * x_batch
+            dx_pad[:, r0:r0+HH, c0:c0+WW] += filter_grad[r][c] * filter
+      
+      dx[n] = dx_pad[:, pad:pad+H, pad:pad+W]
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
