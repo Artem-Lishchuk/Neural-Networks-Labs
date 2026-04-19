@@ -48,7 +48,14 @@ class ThreeLayerConvNet(object):
         # hidden affine layer, and keys 'W3' and 'b3' for the weights and biases   #
         # of the output affine layer.                                              #
         ############################################################################
+        C, H, W = input_dim
+        self.params['W1'] = torch.randn(num_filters, C, filter_size, filter_size) * weight_scale
+        self.params['b1'] = torch.zeros(num_filters, )
 
+        self.params['W2'] = torch.randn(num_filters * H * W // 4, hidden_dim) * weight_scale
+        self.params['b2'] = torch.zeros(hidden_dim)
+        self.params['W3'] = torch.randn(hidden_dim, num_classes) * weight_scale
+        self.params['b3'] = torch.zeros(num_classes)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -74,6 +81,12 @@ class ThreeLayerConvNet(object):
         pool_param = {'pool_height': 2, 'pool_width': 2, 'stride': 2}
 
         scores = None
+        
+        """
+        A three-layer convolutional network with the following architecture:
+
+        conv - relu - 2x2 max pool - affine - relu - affine - softmax
+        """
 
         ############################################################################
         # Task 6.7                                                                 #
@@ -81,7 +94,7 @@ class ThreeLayerConvNet(object):
         # computing the class scores for X and storing them in the scores          #
         # variable.                                                                #
         ############################################################################
-
+        
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
