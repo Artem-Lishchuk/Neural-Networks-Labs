@@ -1,4 +1,6 @@
+from sympy.parsing.sympy_parser import null
 import torch
+import numpy as np
 
 def conv_forward_naive(x, w, b, conv_param):
 
@@ -30,13 +32,43 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                         #
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
+    images = []
+    N, C, H, W = x.shape
+    F, C, HH, WW = w.shape
+    pad = conv_param['pad']
+    stride = conv_param['stride']
+    
+    for image in x:
+      image = np.pad(image, ((0, 0), (pad, pad), (pad, pad)), 'constant')
+      filters = []
+      for (filter, bias) in zip(w,b):
 
+        H_conv = (H + 2 * pad - HH) // stride + 1
+        W_conv = (W + 2 * pad - WW) // stride + 1
+
+        image_convoluted = torch.empty((H_conv, W_conv), dtype = torch.float64)
+        r_conv, c_conv = 0, 0
+        for r in range(0, H + 2 * pad - HH + 1, stride):
+          for c in range(0, W + 2 * pad - WW + 1, stride):
+            x_batch = image[:, r: r + HH, c : c + WW] 
+            # scalar = filter.T @ x_batch + bias
+            scalar = torch.sum(filter * x_batch, dtype = torch.float64) + bias
+            image_convoluted[r_conv][c_conv] = scalar
+            c_conv += 1
+
+          c_conv = 0
+          r_conv += 1
+
+        filters.append(image_convoluted)
+        filters_tensor = torch.stack(filters)
+
+      images.append(filters_tensor)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
 
     cache = (x, w, b, conv_param) # store the input data and parameters for backpropagation
-
+    out = torch.stack(images)
     return out, cache
 
 def conv_backward_naive(dout, cache):

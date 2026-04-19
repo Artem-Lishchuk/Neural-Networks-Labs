@@ -71,7 +71,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # running_mean and running_std variables.                             #
         #######################################################################
 
-
+        pass
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -84,13 +84,14 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # then scale and shift the normalized data using gamma and beta.      #
         # Store the result in the out variable.                               #
         #######################################################################
+        pass
 
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
 
     else:
-
+        
         raise ValueError('Invalid forward batchnorm mode "%s"' % mode)
 
     # Store the updated running means back into bn_param
