@@ -193,6 +193,30 @@ def max_pool_backward_naive(dout, cache):
     # Task 6.5                                                                #
     # TODO: Implement the max pooling backward pass                           #
     ###########################################################################
+    x, pool_param = cache
+    images = []
+
+    N, C, H, W = x.shape
+
+    pool_width = pool_param['pool_width']
+    pool_height = pool_param['pool_height']
+
+    stride = pool_param['stride']
+
+    dx = torch.zeros_like(x)
+
+    for n, image in enumerate(x):
+      H_out = (H - pool_height) // stride + 1
+      W_out = (W - pool_width) // stride + 1
+      image_pooled = torch.zeros((C, H_out, W_out), dtype = x.dtype)
+
+      for r in range(H_out):
+        for c in range(W_out):
+          r0 = r * stride
+          c0 = c * stride
+          batch = image[:, r0:r0+ pool_height, c0:c0 + pool_width]
+          mask = (batch == torch.Tensor.amax(batch, dim = (1, 2), keepdim = True))
+          dx[n, :, r0:r0+ pool_height, c0:c0 + pool_width] += mask * dout[n, :, r, c][:, None, None]
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
