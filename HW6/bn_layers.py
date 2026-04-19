@@ -70,8 +70,14 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # mean and running standard deviation, storing your result in the     #
         # running_mean and running_std variables.                             #
         #######################################################################
+        sample_mean = torch.mean(x, dim = 0, keepdim=True)
+        running_mean = running_mean * momentum + (1 - momentum) * sample_mean
 
-        pass
+        sample_std = torch.std(x, dim = 0, keepdim=True, correction = 0)
+        running_std = running_std * momentum + (1 - momentum) * sample_std
+
+        out = (x - sample_mean) / (sample_std + eps)
+        out = gamma * out + beta
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -84,7 +90,8 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # then scale and shift the normalized data using gamma and beta.      #
         # Store the result in the out variable.                               #
         #######################################################################
-        pass
+        out = (x - running_mean) / (running_std + eps)
+        out = gamma * out + beta
 
         #######################################################################
         #                          END OF YOUR CODE                           #
